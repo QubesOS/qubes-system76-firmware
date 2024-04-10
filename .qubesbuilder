@@ -1,0 +1,4 @@
+host:
+  rpm:
+    build:
+    - system76-firmware.spec
