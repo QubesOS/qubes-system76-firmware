@@ -1,0 +1,46 @@
+From 898aa634c248e8ab8e9b8172d2cf5a06385e7dca Mon Sep 17 00:00:00 2001
+Message-ID: <898aa634c248e8ab8e9b8172d2cf5a06385e7dca.1718407351.git.demi@invisiblethingslab.com>
+In-Reply-To: <cover.1718407351.git.demi@invisiblethingslab.com>
+References: <cover.1718407351.git.demi@invisiblethingslab.com>
+From: Demi Marie Obenour <demi@invisiblethingslab.com>
+Date: Sun, 24 Mar 2024 20:12:24 -0400
+Subject: [PATCH 1/2] Drop hidapi dependency
+Cc: Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>
+
+It isn't needed for Qubes OS and it is not available in Fedora.
+---
+ tool/Cargo.toml | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/tool/Cargo.toml b/tool/Cargo.toml
+index 022bb4780f58e488fc6771807a97362ec212f095..86dc8a5852c52db6e10709c288e30f7ea8ed633e 100644
+--- a/tool/Cargo.toml
++++ b/tool/Cargo.toml
+@@ -11,20 +11,16 @@ documentation = "https://docs.rs/system76_ectool"
+ [lib]
+ name = "ectool"
+ 
+-[[bin]]
+-name = "system76_ectool"
+-required-features = ["std", "hidapi", "clap"]
+-
+ [dependencies]
+ clap = { version = "3.2", features = ["derive"], optional = true }
+ libc = { version = "0.2", optional = true }
+ # NOTE: Upgrading to 2.x blocked on Ubuntu shipping newer hidapi
+-hidapi = { version = "1.5", default-features = false, features = ["linux-shared-hidraw"], optional = true }
++#hidapi = { version = "1.5", default-features = false, features = ["linux-shared-hidraw"], optional = true }
+ redox_hwio = { version = "0.1.6", default-features = false, optional = true }
+ downcast-rs = { version = "1.2.0", default-features = false }
+ 
+ [features]
+-default = ["std", "hidapi", "clap"]
++default = ["std"]
+ std = ["libc", "downcast-rs/std"]
+ 
+ [package.metadata.docs.rs]
+-- 
+Sincerely,
+Demi Marie Obenour (she/her/hers)
+Invisible Things Lab
+

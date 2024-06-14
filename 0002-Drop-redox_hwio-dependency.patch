@@ -1,0 +1,32 @@
+From 881979526dce632c779267a72569120e0964a031 Mon Sep 17 00:00:00 2001
+Message-ID: <881979526dce632c779267a72569120e0964a031.1718407351.git.demi@invisiblethingslab.com>
+In-Reply-To: <cover.1718407351.git.demi@invisiblethingslab.com>
+References: <cover.1718407351.git.demi@invisiblethingslab.com>
+From: Demi Marie Obenour <demi@invisiblethingslab.com>
+Date: Fri, 14 Jun 2024 19:21:44 -0400
+Subject: [PATCH 2/2] Drop redox_hwio dependency
+Cc: Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>
+
+It isn't needed either.
+---
+ tool/Cargo.toml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tool/Cargo.toml b/tool/Cargo.toml
+index 86dc8a5852c52db6e10709c288e30f7ea8ed633e..a5eae3657ef237991865f53403f1598eb6ad3a18 100644
+--- a/tool/Cargo.toml
++++ b/tool/Cargo.toml
+@@ -16,7 +16,7 @@ clap = { version = "3.2", features = ["derive"], optional = true }
+ libc = { version = "0.2", optional = true }
+ # NOTE: Upgrading to 2.x blocked on Ubuntu shipping newer hidapi
+ #hidapi = { version = "1.5", default-features = false, features = ["linux-shared-hidraw"], optional = true }
+-redox_hwio = { version = "0.1.6", default-features = false, optional = true }
++#redox_hwio = { version = "0.1.6", default-features = false, optional = true }
+ downcast-rs = { version = "1.2.0", default-features = false }
+ 
+ [features]
+-- 
+Sincerely,
+Demi Marie Obenour (she/her/hers)
+Invisible Things Lab
+

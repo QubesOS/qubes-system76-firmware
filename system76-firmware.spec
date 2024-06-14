@@ -14,6 +14,15 @@ License:        GPL-3.0-only AND MIT AND MIT OR Apache-2.0
 URL:            https://www.qubes-os.org
 Source:         %{name}-%{version}.tar.gz
 
+# EC patches
+Patch1:         0001-Drop-hidapi-dependency.patch
+Patch2:         0002-Drop-redox_hwio-dependency.patch
+
+# buildchain patches
+Patch200:       0200-Qubes-OS-support.patch
+Patch201:       0201-Use-system-libsodium-instead-of-sodalite.patch
+Patch202:       0202-Vendor-base32-crate.patch
+
 BuildRequires:  cargo-rpm-macros >= 24
 BuildRequires:  xz-devel
 BuildRequires:  libsodium
@@ -24,7 +33,9 @@ BuildRequires:  libsodium
 %description %{_description}
 
 %prep
-%autosetup -n system76-firmware-%{version} -p1
+%autosetup -N -n system76-firmware-%{version} -p1
+%patch -d ec -P1 -P2 -p1
+%patch -d buildchain -P200 -P201 -P202 -p1
 %cargo_prep
 
 %generate_buildrequires
