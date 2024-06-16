@@ -19,11 +19,9 @@ clap = { version = "3", features = ["derive"] }
 ecflash = { git = "https://github.com/system76/ecflash.git", branch = "stable" }
 libc = "0.2"
 plain = "0.2"
-rust-lzma = "0.6"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"
-tar = "=0.4.35"
 tempfile = "3.8"
 uuid = "1.4"
 
