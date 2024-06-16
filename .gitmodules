@@ -1,0 +1,13 @@
+[submodule "buildchain"]
+	path = buildchain
+	url = https://github.com/system76/buildchain.git
+[submodule "ecflash"]
+	path = ecflash
+	url = https://github.com/system76/ecflash.git
+	branch = stable
+[submodule "system76-firmware"]
+	path = system76-firmware-a
+	url = https://github.com/pop-os/system76-firmware
+[submodule "ec"]
+	path = ec
+	url = https://github.com/system76/ec

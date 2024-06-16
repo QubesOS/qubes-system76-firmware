@@ -1,0 +1,29 @@
+From a511eb678bdfd57e892c36b7287f71cec43272aa Mon Sep 17 00:00:00 2001
+Message-ID: <a511eb678bdfd57e892c36b7287f71cec43272aa.1739934516.git.demi@invisiblethingslab.com>
+From: Demi Marie Obenour <demi@invisiblethingslab.com>
+Date: Sun, 24 Mar 2024 20:12:24 -0400
+Subject: [PATCH] Drop hidapi and redox_hwio dependencies
+
+They aren't needed for Qubes OS and are not available in Fedora.
+---
+ tool/Cargo.toml | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/tool/Cargo.toml b/tool/Cargo.toml
+index 9b6cde80fe863b391a50a5bc42ad92f934815b43..ba4431faa3feb683c03a8bcda8683f43705bb092 100644
+--- a/tool/Cargo.toml
++++ b/tool/Cargo.toml
+@@ -17,8 +17,6 @@ required-features = ["std"]
+ 
+ [dependencies]
+ libc = { version = "0.2", optional = true }
+-hidapi = { version = "1.2", optional = true }
+-redox_hwio = { version = "0.1.3", optional = true }
+ 
+ [features]
+ default = ["std"]
+-- 
+Sincerely,
+Demi Marie Obenour (she/her/hers)
+Invisible Things Lab
+

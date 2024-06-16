@@ -1,0 +1,101 @@
+From 3e22bad619dc5778bc69b95cdbf3fe7802fbeb74 Mon Sep 17 00:00:00 2001
+Message-ID: <3e22bad619dc5778bc69b95cdbf3fe7802fbeb74.1739938139.git.demi@invisiblethingslab.com>
+From: Demi Marie Obenour <demi@invisiblethingslab.com>
+Date: Tue, 18 Feb 2025 23:08:35 -0500
+Subject: [PATCH] Drop lazy_static dependency
+
+Needed for Fedora 37.
+---
+ Cargo.toml  |  4 +---
+ src/io.rs   | 14 ++++++++------
+ src/lib.rs  |  3 ---
+ src/main.rs |  2 +-
+ 4 files changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/Cargo.toml b/Cargo.toml
+index c969cbba76950f3c25446b64deccefab0052ecf8..ab5fc8b5719623c1d8cf330a8d0cb7d67a3137b4 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -2,9 +2,7 @@
+ name = "ecflash"
+ version = "0.1.0"
+ authors = ["Jeremy Soller <jackpot51@gmail.com>"]
+-
+-[dependencies]
+-lazy_static = "1.0"
++edition = "2021"
+ 
+ [profile.release]
+ lto = true
+diff --git a/src/io.rs b/src/io.rs
+index b60793aef01f138a7344175a900febc3966f64d0..249b4f69a2304e033388c8eeb3cabe8a4bd2c375 100644
+--- a/src/io.rs
++++ b/src/io.rs
+@@ -1,22 +1,24 @@
+ use std::fs::{File, OpenOptions};
+ use std::io::{Read, Seek, SeekFrom, Write};
+-use std::sync::Mutex;
++use std::sync::{Mutex, OnceLock};
+ 
+-lazy_static! {
+-    static ref FILE: Mutex<File> = Mutex::new(
++static FILE: OnceLock<Mutex<File>> = OnceLock::new();
++
++fn open_dev_port() -> Mutex<File> {
++    Mutex::new(
+         OpenOptions::new()
+             .read(true)
+             .write(true)
+             .open("/dev/port")
+             .expect("failed to open /dev/port")
+-        );
++    )
+ }
+ 
+ #[inline(always)]
+ pub unsafe fn inb(port: u16) -> u8 {
+     let mut buf = [0];
+ 
+-    let mut file = FILE.lock().unwrap();
++    let mut file = FILE.get_or_init(open_dev_port).lock().unwrap();
+     file.seek(SeekFrom::Start(port as u64)).unwrap();
+     file.read(&mut buf).unwrap();
+ 
+@@ -25,7 +27,7 @@ pub unsafe fn inb(port: u16) -> u8 {
+ 
+ #[inline(always)]
+ pub unsafe fn outb(port: u16, value: u8) {
+-    let mut file = FILE.lock().unwrap();
++    let mut file = FILE.get_or_init(open_dev_port).lock().unwrap();
+     file.seek(SeekFrom::Start(port as u64)).unwrap();
+     file.write(&[value]).unwrap();
+ }
+diff --git a/src/lib.rs b/src/lib.rs
+index 3d33af914fb61060403ef859d2cf4b0677e79c15..6ff463555a7f140ab771d1fa7a7820467e9f2d63 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -1,6 +1,3 @@
+-#[macro_use]
+-extern crate lazy_static;
+-
+ pub use self::file::EcFile;
+ pub use self::flash::EcFlash;
+ 
+diff --git a/src/main.rs b/src/main.rs
+index 1b718b645fc1bdb5d77d1db52f45d4a6d7ad88dd..e0450c4f8e324942fe0f8538f5305f8a1ede69f6 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -33,7 +33,7 @@ fn main() {
+         }
+     }
+ 
+-    let mut ecs: Vec<(String, Box<Ec>)> = Vec::new();
++    let mut ecs: Vec<(String, Box<dyn Ec>)> = Vec::new();
+ 
+     for arg in env::args().skip(1) {
+         match arg.as_str() {
+-- 
+Sincerely,
+Demi Marie Obenour (she/her/hers)
+Invisible Things Lab
+

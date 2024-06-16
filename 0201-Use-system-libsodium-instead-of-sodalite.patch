@@ -1,0 +1,96 @@
+From fe0f46fe3aec25347720862abae9a8180d45a624 Mon Sep 17 00:00:00 2001
+Message-ID: <fe0f46fe3aec25347720862abae9a8180d45a624.1739939333.git.demi@invisiblethingslab.com>
+In-Reply-To: <64ad9d52ac3020d894d99a9a398c254821cb0809.1739939333.git.demi@invisiblethingslab.com>
+References: <64ad9d52ac3020d894d99a9a398c254821cb0809.1739939333.git.demi@invisiblethingslab.com>
+From: Demi Marie Obenour <demi@invisiblethingslab.com>
+Date: Tue, 19 Mar 2024 17:40:57 -0400
+Subject: [PATCH 201/203] Use system libsodium instead of sodalite
+
+This is easier to patch if needed, and sodalite is not in Fedora.
+---
+ Cargo.toml   |  1 -
+ src/block.rs | 39 ++++++++++++++++++++++++---------------
+ 2 files changed, 24 insertions(+), 16 deletions(-)
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 792d8a781d1a40dbc1fb1201bce966ab9fe33a46..cd0b54ae0ab0e135bdd3ee7e4a6e1ef1e5247e59 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -25,5 +25,4 @@ rand = "0.8.5"
+ serde = { version = "1.0.188", features = ["derive"] }
+ serde_json = "1.0.107"
+ sha2 = "0.10.8"
+-sodalite = "0.4.0"
+ tempfile = "3.8.0"
+diff --git a/src/block.rs b/src/block.rs
+index 20b2c3f90536bcff069a8fbc86c901556399b710..f3de63cbac0da7439ae4a1ce3844b1a4bb6f98df 100644
+--- a/src/block.rs
++++ b/src/block.rs
+@@ -1,8 +1,8 @@
+ // SPDX-License-Identifier: GPL-3.0-only
+ 
+-use plain::{self, Plain};
++use plain::Plain;
+ use serde::{Deserialize, Serialize};
+-use sodalite::sign_attached_open;
++use std::ffi::{c_uchar, c_ulonglong, c_int};
+ 
+ use crate::store::b32enc;
+ 
+@@ -17,9 +17,11 @@ pub(crate) struct PackedBlockRequest {
+     digest: [u8; 48],
+ }
+ 
++const SIGLEN: usize = 64;
++
+ #[repr(packed)]
+ pub(crate) struct PackedBlock {
+-    signature: [u8; 64],
++    signature: [u8; SIGLEN],
+     public_key: [u8; 32],
+     previous_signature: [u8; 64],
+     counter: u64,
+@@ -40,19 +42,26 @@ impl PackedBlock {
+             ));
+         }
+ 
+-        {
+-            let sm = unsafe { plain::as_bytes(self) };
+-
+-            let mut m = vec![0; sm.len()];
+-            match sign_attached_open(&mut m, sm, &self.public_key) {
+-                Ok(count) => m.truncate(count),
+-                Err(()) => return Err("signature invalid".to_string()),
+-            }
++        #[link(name = ":libsodium.so.23")]
++        extern "C" {
++            fn crypto_sign_verify_detached(
++                sig: *const c_uchar,
++                m: *const c_uchar,
++                mlen: c_ulonglong,
++                pk: *const c_uchar,
++            ) -> c_int;
++        }
+ 
+-            // Check that message matches signed message after skipping the signature
+-            if m != sm[64..] {
+-                return Err("message data invalid".to_string());
+-            }
++        if unsafe {
++            let ptr = self as *const _ as *const c_uchar;
++            crypto_sign_verify_detached(
++                ptr,
++                ptr.add(SIGLEN),
++                (core::mem::size_of::<Self>() - SIGLEN) as _,
++                ptr.add(SIGLEN),
++            ) != 0
++        } {
++            return Err("signature invalid".to_string());
+         }
+ 
+         Ok(Block {
+-- 
+Sincerely,
+Demi Marie Obenour (she/her/hers)
+Invisible Things Lab
+

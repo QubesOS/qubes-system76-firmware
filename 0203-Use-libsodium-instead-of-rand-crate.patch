@@ -1,0 +1,64 @@
+From af9863a9fd4b2ff120036186027cfa297c692d99 Mon Sep 17 00:00:00 2001
+Message-ID: <af9863a9fd4b2ff120036186027cfa297c692d99.1739939333.git.demi@invisiblethingslab.com>
+In-Reply-To: <64ad9d52ac3020d894d99a9a398c254821cb0809.1739939333.git.demi@invisiblethingslab.com>
+References: <64ad9d52ac3020d894d99a9a398c254821cb0809.1739939333.git.demi@invisiblethingslab.com>
+From: Demi Marie Obenour <demi@invisiblethingslab.com>
+Date: Tue, 18 Feb 2025 22:43:40 -0500
+Subject: [PATCH 203/203] Use libsodium instead of rand crate
+
+Saves a dependency.
+---
+ Cargo.toml   |  1 -
+ src/store.rs | 13 ++++++++++---
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 4ee815d45e1953fae6ee22bbee872f240e5e3abe..1bb270e5485ce74a32c85363c6bdb403a100abcf 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -21,7 +21,6 @@ doc = false
+ base32 = { version = "0.4.0", path = "../vendor/base32" }
+ clap = "3.2.25"
+ plain = "0.2.3"
+-rand = "0.8.5"
+ serde = { version = "1.0.188", features = ["derive"] }
+ serde_json = "1.0.107"
+ sha2 = "0.10.8"
+diff --git a/src/store.rs b/src/store.rs
+index e8d79d21828b307658bdb8d925d11186a679ee9a..fc311f117c541af525134cd5431f941556624018 100644
+--- a/src/store.rs
++++ b/src/store.rs
+@@ -7,8 +7,6 @@ use std::os::unix::fs::{symlink, OpenOptionsExt, PermissionsExt};
+ use std::path::{Path, PathBuf};
+ 
+ use base32::{self, Alphabet};
+-use rand::rngs::OsRng;
+-use rand::RngCore;
+ use sha2::{Digest, Sha384};
+ 
+ use crate::Manifest;
+@@ -36,9 +34,18 @@ fn tail_to_block(sig: &[u8; 64]) -> PathBuf {
+     PathBuf::from("../..").join(block_relpath(sig))
+ }
+ 
++#[link(name = ":libsodium.so.23")]
++extern "C" {
++    fn randombytes_buf(
++        buf: *mut std::ffi::c_void,
++        size: usize,
++    ) -> std::ffi::c_void;
++}
++
+ pub fn random_id() -> String {
+     let mut key = [0u8; 15];
+-    OsRng.fill_bytes(&mut key);
++    // SAFETY: the FFI function is correctly declared and called
++    unsafe { randombytes_buf(key.as_mut_ptr() as *mut _, key.len()); }
+     b32enc(&key)
+ }
+ 
+-- 
+Sincerely,
+Demi Marie Obenour (she/her/hers)
+Invisible Things Lab
+

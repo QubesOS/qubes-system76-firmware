@@ -1,0 +1,31 @@
+From 8b82358b38929dd106de2e37a888d14cb28a0617 Mon Sep 17 00:00:00 2001
+Message-ID: <8b82358b38929dd106de2e37a888d14cb28a0617.1739939333.git.demi@invisiblethingslab.com>
+In-Reply-To: <64ad9d52ac3020d894d99a9a398c254821cb0809.1739939333.git.demi@invisiblethingslab.com>
+References: <64ad9d52ac3020d894d99a9a398c254821cb0809.1739939333.git.demi@invisiblethingslab.com>
+From: Demi Marie Obenour <demi@invisiblethingslab.com>
+Date: Fri, 14 Jun 2024 19:28:50 -0400
+Subject: [PATCH 202/203] Vendor base32 crate
+
+Fedora 37 doesn't have it.
+---
+ Cargo.toml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Cargo.toml b/Cargo.toml
+index cd0b54ae0ab0e135bdd3ee7e4a6e1ef1e5247e59..4ee815d45e1953fae6ee22bbee872f240e5e3abe 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -18,7 +18,7 @@ path = "src/main.rs"
+ doc = false
+ 
+ [dependencies]
+-base32 = "0.4.0"
++base32 = { version = "0.4.0", path = "../vendor/base32" }
+ clap = "3.2.25"
+ plain = "0.2.3"
+ rand = "0.8.5"
+-- 
+Sincerely,
+Demi Marie Obenour (she/her/hers)
+Invisible Things Lab
+

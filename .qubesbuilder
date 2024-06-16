@@ -1,0 +1,13 @@
+host:
+  rpm:
+    build:
+    - system76-firmware.spec
+source:
+  files:
+  - git-url: https://github.com/pop-os/system76-firmware
+    commit-id: 66511874287f6b1ba8222c9f9ae25ed8d71d6039
+    git-basename: system76-firmware
+  modules:
+  - ec
+  - buildchain
+  - ecflash
